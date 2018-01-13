@@ -1,0 +1,26 @@
+diff --git a/src/rxvtfont.C b/src/rxvtfont.C
+index c56921c8..b800ad20 100644
+--- a/src/rxvtfont.C
++++ b/src/rxvtfont.C
+@@ -1267,12 +1267,21 @@ rxvt_font_xft::load (const rxvt_fontprop &prop, bool force_prop)
+           XGlyphInfo g;
+           XftTextExtents16 (disp, f, &ch, 1, &g);
+ 
++          /* don't use g.width for character width
++           * use g.xOff, see e.g: http://keithp.com/~keithp/render/Xft.tutorial
++           * thanks to https://aur.archlinux.org/cgit/aur.git/plain/font-width-fix.patch?h=rxvt-unicode-256xresources
++
+           g.width -= g.x;
+ 
+           int wcw = WCWIDTH (ch);
+           if (wcw > 0) g.width = (g.width + wcw - 1) / wcw;
+ 
+           if (width    < g.width       ) width    = g.width;
++          */
++          int wcw = WCWIDTH (ch);
++          if (wcw > 1) g.xOff = g.xOff / wcw;
++          if (width < g.xOff) width = g.xOff;
++
+           if (height   < g.height      ) height   = g.height;
+           if (glheight < g.height - g.y) glheight = g.height - g.y;
+         }
